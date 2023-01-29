@@ -65,7 +65,7 @@ exports.deleteProduct = catchAsyncError(async (req, res, next) => {
 
 // Get All Product
 exports.getAllProduct = catchAsyncError(async (req, res) => {
-  const resultPerPage = 3;
+  const resultPerPage = 4;
 
   const apiFeature = new ApiFeatures(Product.find(), req.query)
     .search()
