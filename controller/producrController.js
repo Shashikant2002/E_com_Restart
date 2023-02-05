@@ -5,6 +5,7 @@ const ErrorHandaner = require("../utils/errorHandeler");
 
 // Creating a Product-- Admin
 exports.createProduct = catchAsyncError(async (req, res, next) => {
+  req.body.user = req.user.id;
   const { name, description, price, images, category } = req.body;
 
   if (!name || !description || !price || !images || !category) {
