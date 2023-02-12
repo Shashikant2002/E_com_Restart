@@ -13,9 +13,11 @@ app.get("/", (req, res) => {
 //Routes
 const productRotue = require("./routes/productRoute");
 const userRoute = require("./routes/userRoute");
+const orderRoute = require("./routes/orderRoute");
 
 app.use("/api/v1", productRotue); 
 app.use("/api/v1", userRoute);
+app.use("/api/v1", orderRoute);
 
 // Middlewere for Error
 app.use(errorMidddleWare);
