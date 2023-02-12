@@ -156,3 +156,124 @@ exports.getUserDetail = catchAsyncError(async (req, res, next) => {
     user,
   });
 });
+
+// Update Password
+exports.updatPassword = catchAsyncError(async (req, res, next) => {
+  const { oldPassword, newPassword, confPassword } = req.body;
+
+  if (!oldPassword || !newPassword || !confPassword) {
+    return next(new ErrorHandaner("Fill All The Fields", 400));
+  }
+  if (newPassword !== confPassword) {
+    return next(
+      new ErrorHandaner("Password and Confirm Password is not Match", 400)
+    );
+  }
+
+  const user = await User.findById(req.user.id).select("+password");
+  const isPasswordMatch = await user.comparePassword(oldPassword);
+
+  if (!isPasswordMatch) {
+    return next(
+      new ErrorHandaner("Old Password is incorrect Kindly please Check.", 400)
+    );
+  }
+
+  user.password = newPassword;
+
+  await user.save();
+
+  sendToken(user, 200, res);
+});
+
+// Update Profile
+exports.updatUserProfile = catchAsyncError(async (req, res, next) => {
+  const { name, email } = req.body;
+
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    { name, email },
+    { new: true, runValidators: true, useFindAndModify: false }
+  );
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+// get all Users
+exports.getAllUsers = catchAsyncError(async (req, res, next) => {
+  const users = await User.find();
+
+  res.status(200).json({
+    success: true,
+    totalUser: users.length,
+    users,
+  });
+});
+
+// get single Users
+exports.getSingleUser = catchAsyncError(async (req, res, next) => {
+  const { userID } = req.params;
+
+  if (!userID) {
+    return next(new ErrorHandaner("Fill The User ID.", 400));
+  }
+
+  const users = await User.findById(userID);
+
+  if (!users) {
+    return next(new ErrorHandaner("User Not Found.", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
+
+// Update User Role
+exports.UpdateUserRole = catchAsyncError(async (req, res, next) => {
+  const { userID, role } = req.body;
+
+  if (!userID) {
+    return next(new ErrorHandaner("Fill The User ID.", 400));
+  }
+
+  const user = await User.findByIdAndUpdate(
+    userID,
+    { role: role },
+    { new: true, runValidators: true, useFindAndModify: false }
+  );
+
+  if (!user) {
+    return next(new ErrorHandaner("User Not Found.", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// Delete User
+exports.deletUser = catchAsyncError(async (req, res, next) => {
+  const { userID } = req.params;
+  if (!userID) {
+    return next(new ErrorHandaner("Please Fill The Id", 404));
+  }
+
+  const user = await User.findById(userID);
+
+  if (!user) {
+    return next(new ErrorHandaner(`User Not Found by this id: ${userID}`, 404));
+  }
+
+  await user.remove();
+
+  res.status(200).json({
+    success: true,
+    message: "User Delete Successful",
+    user,
+  });
+});
