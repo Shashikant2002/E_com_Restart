@@ -46,7 +46,7 @@ exports.getSingleProduct = catchAsyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: product,
+    product,
   });
 });
 
@@ -67,16 +67,17 @@ exports.deleteProduct = catchAsyncError(async (req, res, next) => {
 // Get All Product
 exports.getAllProduct = catchAsyncError(async (req, res) => {
   const resultPerPage = 4;
-
+  const productCount = await Product.countDocuments();
   const apiFeature = new ApiFeatures(Product.find(), req.query)
     .search()
     .filter()
     .pagenation(resultPerPage);
-  const allProduct = await apiFeature.query;
+  const products = await apiFeature.query;
 
   res.status(200).json({
     success: true,
-    message: allProduct,
+    productCount,
+    products,
   });
 });
 
