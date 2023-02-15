@@ -65,8 +65,11 @@ exports.deleteProduct = catchAsyncError(async (req, res, next) => {
 });
 
 // Get All Product
-exports.getAllProduct = catchAsyncError(async (req, res) => {
-  const resultPerPage = 4;
+exports.getAllProduct = catchAsyncError(async (req, res, next) => {
+
+  // return next(new ErrorHandaner("Testing", 404));
+
+  const resultPerPage = 20;
   const productCount = await Product.countDocuments();
   const apiFeature = new ApiFeatures(Product.find(), req.query)
     .search()
@@ -75,15 +78,15 @@ exports.getAllProduct = catchAsyncError(async (req, res) => {
   const products = await apiFeature.query;
 
   res.status(200).json({
-    success: true,
+    success: true, 
     productCount,
     products,
   });
 });
 
 // Create New Review and update the Review
-exports.createProductReview = catchAsyncError(async (req, res) => {
-  const { rating, comment, productId } = req.body;
+exports.createProductReview = catchAsyncError(async (req, res, next) => {
+  const { rating, comment, productId, avtar } = req.body;
 
   if (!rating || !comment || !productId) {
     return next(new ErrorHandaner("Fill All The Field", 400));
@@ -94,6 +97,7 @@ exports.createProductReview = catchAsyncError(async (req, res) => {
     name: req.user.name,
     rating: Number(rating),
     comment,
+    avtar
   };
 
   const product = await Product.findById(productId);
@@ -111,6 +115,7 @@ exports.createProductReview = catchAsyncError(async (req, res) => {
       if (ele.user.toString() === ele.user._id.toString()) {
         ele.rating = rating;
         ele.comment = comment;
+        ele.avtar = avtar;
       }
     });
   } else {

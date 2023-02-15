@@ -59,6 +59,18 @@ const productSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         required: true,
       },
+      avtar:
+      {
+        publicId: {
+          type: String,
+          required: true,
+        },
+        url: {
+          type: String,
+          required: true,
+        },
+      },
+
       name: {
         type: String,
         required: true,
