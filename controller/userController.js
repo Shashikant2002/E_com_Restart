@@ -4,13 +4,28 @@ const User = require("../models/userModel");
 const sendToken = require("../utils/jwtToken");
 const sendEMail = require("../utils/sendMail");
 const crypto = require("crypto");
+const cloudinary = require("cloudinary");
 
 // Register a User
 exports.registerUser = catchAsyncError(async (req, res, next) => {
-  const { name, email, password, avtar } = req.body;
+  const { name, email, password, avtar, cPassword } = req.body;
+
+  if (password !== cPassword) {
+    return next(
+      new ErrorHandaner("Password Does not Match with Confirm Pasword", 400)
+    );
+  }
+
   if (!name || !email || !password) {
     return next(new ErrorHandaner("Please Fill All the Required Field", 400));
   }
+
+  const myCloud = await cloudinary.v2.uploader.upload(avtar, {
+    folder: "e_com/avtar",
+    // width: 150,
+    // crop: "scale",
+  });
+
   const findUser = await User.findOne({ email: email });
 
   if (findUser) {
@@ -21,7 +36,15 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
       )
     );
   }
-  const user = await User.create({ name, email, password, avtar });
+  const user = await User.create({
+    name,
+    email,
+    password,
+    avtar: {
+      publicId: myCloud.public_id,
+      url: myCloud.secure_url,
+    },
+  });
 
   await sendToken(user, 200, res);
 });
@@ -188,13 +211,38 @@ exports.updatPassword = catchAsyncError(async (req, res, next) => {
 
 // Update Profile
 exports.updatUserProfile = catchAsyncError(async (req, res, next) => {
-  const { name, email } = req.body;
+  const { name, email, avtar } = req.body;
 
-  const user = await User.findByIdAndUpdate(
-    req.user.id,
-    { name, email },
-    { new: true, runValidators: true, useFindAndModify: false }
-  );
+  const newUserData = {
+    name: name,
+    email: email,
+  };
+
+  if (avtar !== "") {
+    const user = await User.findById(req.user.id);
+    console.log(user);
+    const imgId = user.avtar.publicId;
+    await cloudinary.v2.uploader.destroy(imgId);
+    console.log("Deleting end");
+
+    const myCloud = await cloudinary.v2.uploader.upload(avtar, {
+      folder: "e_com/avtar",
+      // width: 150,
+      // crop: "scale",
+    });
+
+    newUserData.avtar = {
+      publicId: myCloud.public_id,
+      url: myCloud.secure_url,
+    };
+  }
+  console.log(newUserData);
+
+  const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
 
   res.status(200).json({
     success: true,

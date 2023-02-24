@@ -49,6 +49,10 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpire: {
     type: Date,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 // Password not change when we modify a data
