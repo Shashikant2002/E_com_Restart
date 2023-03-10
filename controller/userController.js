@@ -94,6 +94,7 @@ exports.forGetPassword = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandaner("Enter Your Email.", 402));
   }
 
+
   const user = await User.findOne({ email });
 
   if (!user) {
@@ -102,12 +103,11 @@ exports.forGetPassword = catchAsyncError(async (req, res, next) => {
 
   //Get Reset Password Token
   const resetToken = await user.getResetPassword();
-  console.log(resetToken);
   await user.save({ validateBeforeSave: false });
 
   const resetPasswordUrl = `${req.protocol}://${req.get(
     "host"
-  )}/api/v1/password/reset/${resetToken}`;
+  )}/api/v1/password/resetpassword/${resetToken}`;
 
   const message = `Your Password Reset Token is:- \n\n ${resetPasswordUrl} \n \n \n if You Have Not Requested this email Ignote it.`;
 
@@ -220,10 +220,9 @@ exports.updatUserProfile = catchAsyncError(async (req, res, next) => {
 
   if (avtar !== "") {
     const user = await User.findById(req.user.id);
-    console.log(user);
     const imgId = user.avtar.publicId;
+
     await cloudinary.v2.uploader.destroy(imgId);
-    console.log("Deleting end");
 
     const myCloud = await cloudinary.v2.uploader.upload(avtar, {
       folder: "e_com/avtar",
@@ -236,7 +235,6 @@ exports.updatUserProfile = catchAsyncError(async (req, res, next) => {
       url: myCloud.secure_url,
     };
   }
-  console.log(newUserData);
 
   const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
     new: true,

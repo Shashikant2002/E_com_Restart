@@ -27,7 +27,7 @@ router.route("/users/:userID").get(isAuthenticatedUSer, authorizeRole('Admin'), 
 router.route("/users/:userID").delete(isAuthenticatedUSer, authorizeRole('Admin'), deletUser);
 router.route("/updateUserRole").post(isAuthenticatedUSer, authorizeRole('Admin'), UpdateUserRole);
 
-router.route("/password/forgetpassword").get(forGetPassword);
+router.route("/password/forgetpassword").post(forGetPassword);
 router.route("/password/resetpassword/:token").post(resetPassword);
 router.route("/password/updatePassowrd").post(isAuthenticatedUSer, updatPassword);
 
